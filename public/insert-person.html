@@ -1,0 +1,29 @@
+<h<!DOCTYPE html>
+    <html lang="pt_br">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>People</title>
+    
+        <link rel="stylesheet" type="text/css" href="base.css">
+    </head>
+    <body>
+        <h1>Cadastro de Pessoas</h1>
+
+        <form novalidate>
+            <input id="name" placeholder="Informe seu nome">
+            <input id="birth" type="date" placeholder="Informe sua data de nascimento   ">
+            <select id="gender" required>
+                <option value="">Selecione...</option>
+                <option value="f">Feminino</option>
+                <option value="m">Masculino</option>
+            </select>
+
+            <button>Cadastrar</button>
+        </form>
+
+        <div id="answer"></div>
+
+        <script src="insert-person.js" type="module"></script>
+    </body>
+    </html>
