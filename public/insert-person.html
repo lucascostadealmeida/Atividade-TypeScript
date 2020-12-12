@@ -6,13 +6,15 @@
         <title>People</title>
     
         <link rel="stylesheet" type="text/css" href="base.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+
     </head>
     <body>
         <h1>Cadastro de Pessoas</h1>
 
         <form novalidate>
             <input id="name" placeholder="Informe seu nome">
-            <input id="birth" type="date" placeholder="Informe sua data de nascimento   ">
+            <input id="birth" type="date" placeholder="Informe sua data de nascimento ">
             <select id="gender" required>
                 <option value="">Selecione...</option>
                 <option value="f">Feminino</option>
@@ -23,6 +25,15 @@
         </form>
 
         <div id="answer"></div>
+
+        <form novalidate id="form2">
+            <input id="filter" placeholder="Informe o nome">
+            <button id="btnFilter">Filtrar</button>
+            <button id="btnClear" type="reset">Limpar</button>
+        </form>
+        
+
+        <table></table>
 
         <script src="insert-person.js" type="module"></script>
     </body>

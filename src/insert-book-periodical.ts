@@ -1,17 +1,21 @@
 import Book from "./entities/Book.js"
 import Periodical from "./entities/Periodical.js"
 import Person from "./entities/Person.js"
+import stringsFuncitons, { capitalize, slugify, trimAll } from "./stringsFunctions.js"
 
 
 const select = document.querySelector<HTMLSelectElement>("select")!
 const form = document.querySelector<HTMLFormElement>("form")!
+const sortBook = (a: Book , b: Book) => a.title.localeCompare(b.title)
+const sortPeriodical = (a: Periodical , b: Periodical) => a.title.localeCompare(b.title)
+
+
+
 
 select.addEventListener("change", (e: Event) => {
     e.preventDefault()
 
     setchoice()
-    
-
 })
 
 
@@ -47,22 +51,23 @@ function InsertBook() {
     const answer = document.querySelector<HTMLDivElement>("#answer")!
     const formulario = document.querySelector<HTMLFormElement>("form")!
 
+
     const books: Book[] = []
+  
+    titleBook()
 
     formulario.addEventListener("submit", (e: Event) => {
         e.preventDefault()
 
-        const valueTitle = title.value.trim()
 
-        if(!valueTitle) {
+        if(!title.value) {
             answer.innerText = "O campo Títilo é obrigatório!"
             title.focus()
             return
         }
 
-        const valueSubtitle = subtitle.value.trim()
 
-        if(!valueSubtitle) {
+        if(!subtitle.value) {
             answer.innerText = "O campo Subtítilo é obrigatório!"
             subtitle.focus()
             return
@@ -105,23 +110,102 @@ function InsertBook() {
 
         try {
             const livro = new Book(
-                title.value,
-                subtitle.value,
+                trimAll(capitalize(slugify(title.value))),
+                trimAll(capitalize(slugify(subtitle.value))),
                 publishedAt.value,
                 author.value,
-                isbn.value,
-                edition.value,
-                volume.value
+                parseInt(isbn.value),
+                parseInt(edition.value),
+                parseInt(volume.value)
             )
 
             books.push(livro)
 
             localStorage.setItem('book', JSON.stringify(books))
+            titleBook()
         } finally{
 
         }
 
-    })    
+    })
+    const filter = document.querySelector<HTMLInputElement>("#filter")!
+    const btnClear = document.querySelector<HTMLButtonElement>("#btnClear")!
+    const formulario2 = document.querySelector<HTMLFormElement>("#form2")!
+    const filterTitleBook = (text: Book) => text.title.includes(slugify(capitalize(trimAll(filter.value))))
+    
+    function filterBook() {
+
+        const table = document.querySelector('table')!
+    const books: Book[] = []
+    
+    if(localStorage.getItem('book')) {
+        const data = JSON.parse(localStorage.getItem('book')!)
+
+        books.splice(0)
+
+        for (let item of data) {
+            books.push(new Book(
+                item.title,
+                item.subtitle,
+                item.publishedAt,
+                item.author,
+                item.isbn,
+                item.edition,
+                item.volume
+            ))
+        }
+    }
+
+    let aux = books.filter(filterTitleBook)
+
+    let lines = ''
+    for (const livro of aux) {
+     lines += `
+        <tr>
+          <td>${ (livro as Book).title }</td>
+          <td>${ (livro as Book).subtitle }</td>
+          <td>${ (livro as Book).publishedAt}</td>
+          <td>${ (livro as Book).author}</td>
+          <td>${ (livro as Book).isbn}</td>
+          <td>${ (livro as Book).edition}</td>
+          <td>${ (livro as Book).volume}</td>
+        </tr>
+      `
+    }  
+    table.className = 'table table-borderless'
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Subtítilo</th>
+          <th>Publicado em</th>
+          <th>Autor</th>
+          <th>ISBN</th>
+          <th>Edição</th>
+          <th>Volume</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${lines}
+      </tbody>
+    `
+
+    }
+
+    formulario2.addEventListener("submit", (e: Event) => {
+        e.preventDefault()
+          
+            if(!filter.value) {
+              answer.innerText = "O campo Filtro é obrigatório!"
+              filter.focus()
+              return
+            }
+          filterBook()
+          btnClear.addEventListener("click", (e: Event) => {
+            titleBook()
+          })    
+            
+        })
 }
 
 function author() {
@@ -165,10 +249,75 @@ function author() {
             <input id="volume" placeholder="Informe o Volume">
             <button>Cadastrar</button>
         </form>
-
+        <form novalidate id="form2">
+        <br>
+            <input id="filter" placeholder="Informe o título">
+            <button id="btnFilter">Filtrar</button>
+            <button id="btnClear" type="reset">Limpar</button>
+        </form>
+        <table></table>
         <div id="answer"></div>
         `
     
+}
+
+
+
+function titleBook() {
+    const table = document.querySelector('table')!
+    const books: Book[] = []
+    
+    if(localStorage.getItem('book')) {
+        const data = JSON.parse(localStorage.getItem('book')!)
+
+        books.splice(0)
+
+        for (let item of data) {
+            books.push(new Book(
+                item.title,
+                item.subtitle,
+                item.publishedAt,
+                item.author,
+                item.isbn,
+                item.edition,
+                item.volume
+            ))
+        }
+    }
+
+    let aux = [...books].sort(sortBook) //ordenando
+
+    let lines = ''
+    for (const livro of aux) {
+     lines += `
+        <tr>
+          <td>${ (livro as Book).title }</td>
+          <td>${ (livro as Book).subtitle }</td>
+          <td>${ (livro as Book).publishedAt}</td>
+          <td>${ (livro as Book).author}</td>
+          <td>${ (livro as Book).isbn}</td>
+          <td>${ (livro as Book).edition}</td>
+          <td>${ (livro as Book).volume}</td>
+        </tr>
+      `
+    }  
+    table.className = 'table table-borderless'
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Subtítilo</th>
+          <th>Publicado em</th>
+          <th>Autor</th>
+          <th>ISBN</th>
+          <th>Edição</th>
+          <th>Volume</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${lines}
+      </tbody>
+    `
 }
 
 function InsertPeriodical() {
@@ -182,22 +331,24 @@ function InsertPeriodical() {
     const answer = document.querySelector<HTMLDivElement>("#answer")!
     const formulario = document.querySelector<HTMLFormElement>("form")!
 
+ 
+
     const periodicals: Periodical[] = []
+    
+    titlePeriodical()
 
     formulario.addEventListener("submit", (e: Event) => {
         e.preventDefault()
 
-        const valueTitle = title.value.trim()
 
-        if(!valueTitle) {
+        if(!title.value) {
             answer.innerText = "O campo Títilo é obrigatório!"
             title.focus()
             return
         }
 
-        const valueSubtitle = subtitle.value.trim()
 
-        if(!valueSubtitle) {
+        if(!subtitle.value) {
             answer.innerText = "O campo Subtítilo é obrigatório!"
             subtitle.focus()
             return
@@ -241,8 +392,8 @@ function InsertPeriodical() {
 
         try {
             const periodico = new Periodical(
-                title.value,
-                subtitle.value,
+                trimAll(capitalize(slugify(title.value))),
+                trimAll(capitalize(slugify(subtitle.value))),
                 publishedAt.value,
                 author.value,
                 issn.value,
@@ -253,12 +404,92 @@ function InsertPeriodical() {
             periodicals.push(periodico)
 
             localStorage.setItem('periodical', JSON.stringify(periodicals))
+            titlePeriodical()
         } finally{
 
         }
 
-    })    
+    })
+    const filter = document.querySelector<HTMLInputElement>("#filter")!
+    const btnClear = document.querySelector<HTMLButtonElement>("#btnClear")!
+    const formulario2 = document.querySelector<HTMLFormElement>("#form2")!
+    const filterTitlePeriodical = (text: Periodical) => text.title.includes(slugify(capitalize(trimAll(filter.value))))
+
+    function filterPeriodical() {
+        const table = document.querySelector('table')!
+        
+        if(localStorage.getItem('periodical')) {
+            const data = JSON.parse(localStorage.getItem('periodical')!)
+    
+            periodicals.splice(0)
+    
+            for (let item of data) {
+                periodicals.push(new Periodical(
+                    item.title,
+                    item.subtitle,
+                    item.publishedAt,
+                    item.author,
+                    item.issn,
+                    item.volume,
+                    item.issue
+    
+                ))
+            }
+        }
+    
+        let aux = periodicals.filter(filterTitlePeriodical)
+        
+        let lines = ''
+        for (const periodico of aux) {
+         lines += `
+            <tr>
+              <td>${ (periodico as Periodical).title }</td>
+              <td>${ (periodico as Periodical).subtitle }</td>
+              <td>${ (periodico as Periodical).publishedAt}</td>
+              <td>${ (periodico as Periodical).author}</td>
+              <td>${ (periodico as Periodical).issn}</td>
+              <td>${ (periodico as Periodical).volume}</td>
+              <td>${ (periodico as Periodical).issue}</td>
+            </tr>
+          `
+        }  
+        table.className = 'table table-borderless'
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Subtítilo</th>
+              <th>Publicado em</th>
+              <th>Autor</th>
+              <th>ISSN</th>
+              <th>Volume</th>
+              <th>ISSUE</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${lines}
+          </tbody>
+        `
+      
+    }
+
+    formulario2.addEventListener("submit", (e: Event) => {
+        e.preventDefault()
+          
+            if(!filter.value) {
+              answer.innerText = "O campo Filtro é obrigatório!"
+              filter.focus()
+              return
+            }
+          filterPeriodical()
+          btnClear.addEventListener("click", (e: Event) => {
+            titlePeriodical()
+          })    
+            
+        })
 }
+
+
 
 function author2() {
     const authors: Person[] = []
@@ -301,8 +532,72 @@ function author2() {
             <input id="issue" placeholder="Informe ISSUE">
             <button>Cadastrar</button>
         </form>
-
+        <form novalidate id="form2">
+        <br>
+            <input id="filter" placeholder="Informe o título">
+            <button id="btnFilter">Filtrar</button>
+            <button id="btnClear" type="reset">Limpar</button>
+        </form>
+        <table></table>
         <div id="answer"></div>
         `
     
+}
+
+function titlePeriodical() {
+    const table = document.querySelector('table')!
+    const periodicals: Periodical[] = []
+    
+    if(localStorage.getItem('periodical')) {
+        const data = JSON.parse(localStorage.getItem('periodical')!)
+
+        periodicals.splice(0)
+
+        for (let item of data) {
+            periodicals.push(new Periodical(
+                item.title,
+                item.subtitle,
+                item.publishedAt,
+                item.author,
+                item.issn,
+                item.volume,
+                item.issue
+
+            ))
+        }
+    }
+
+    let aux = [...periodicals].sort(sortPeriodical) //ordenando
+
+    let lines = ''
+    for (const periodico of aux) {
+     lines += `
+        <tr>
+          <td>${ (periodico as Periodical).title }</td>
+          <td>${ (periodico as Periodical).subtitle }</td>
+          <td>${ (periodico as Periodical).publishedAt}</td>
+          <td>${ (periodico as Periodical).author}</td>
+          <td>${ (periodico as Periodical).issn}</td>
+          <td>${ (periodico as Periodical).volume}</td>
+          <td>${ (periodico as Periodical).issue}</td>
+        </tr>
+      `
+    }  
+    table.className = 'table table-borderless'
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Subtítilo</th>
+          <th>Publicado em</th>
+          <th>Autor</th>
+          <th>ISSN</th>
+          <th>Volume</th>
+          <th>ISSUE</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${lines}
+      </tbody>
+    `
 }
